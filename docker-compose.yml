@@ -1,0 +1,39 @@
+version: "3"
+services:
+  php-worker:
+    build: ./docker/php-worker
+    volumes:
+      - .:/var/www/html
+      - ./docker/php-worker/supervisord.d:/etc/supervisord.d
+    depends_on:
+      - redis
+      - mysql
+    env_file: .env
+    environment:
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_DRIVER: redis
+    network_mode: "host"
+
+  mysql:
+    build: ./docker/mysql
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USERNAME: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    network_mode: "host"
+
+  redis:
+    build: ./docker/redis
+    volumes:
+      - redis:/data
+    network_mode: "host"
+
+volumes:
+  redis:
+    driver: "local"
+  mysql:
+    driver: "local"
